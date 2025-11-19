@@ -3,454 +3,965 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gen AI News Digest - {{ date }}</title>
+    <title>YUV.AI Trends - {{ date }}</title>
+
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
     <style>
+        :root {
+            /* Light Theme (Default) */
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-muted: #86868b;
+            --border-color: #e0e0e0;
+            --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --card-shadow-hover: 0 8px 24px rgba(102, 126, 234, 0.15);
+            --accent-color: #667eea;
+            --accent-secondary: #764ba2;
+            --success-color: #34c759;
+            --warning-color: #ff9800;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --border-color: #404040;
+            --card-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            --card-shadow-hover: 0 8px 24px rgba(102, 126, 234, 0.3);
+            --accent-color: #8b9cff;
+            --accent-secondary: #9d6fd4;
+            --glass-bg: rgba(45, 45, 45, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="cyberpunk"] {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #1a1f3a;
+            --bg-accent: linear-gradient(135deg, #ff006e 0%, #8338ec 100%);
+            --text-primary: #00f5ff;
+            --text-secondary: #b3f6ff;
+            --text-muted: #6b93a8;
+            --border-color: #ff006e;
+            --accent-color: #ff006e;
+            --accent-secondary: #8338ec;
+            --glass-bg: rgba(26, 31, 58, 0.7);
+            --glass-border: rgba(255, 0, 110, 0.3);
+        }
+
+        [data-theme="ocean"] {
+            --bg-primary: #0a1128;
+            --bg-secondary: #1e3a5f;
+            --bg-accent: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+            --text-primary: #e0f7ff;
+            --text-secondary: #a8dadc;
+            --text-muted: #6b8e9b;
+            --border-color: #00d9ff;
+            --accent-color: #00d9ff;
+            --accent-secondary: #0099cc;
+            --glass-bg: rgba(30, 58, 95, 0.7);
+            --glass-border: rgba(0, 217, 255, 0.3);
+        }
+
+        [data-theme="forest"] {
+            --bg-primary: #1a2f1a;
+            --bg-secondary: #2d4a2d;
+            --bg-accent: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
+            --text-primary: #d8f3dc;
+            --text-secondary: #95d5b2;
+            --text-muted: #6b8a74;
+            --border-color: #52b788;
+            --accent-color: #52b788;
+            --accent-secondary: #2d6a4f;
+            --glass-bg: rgba(45, 74, 45, 0.7);
+            --glass-border: rgba(82, 183, 136, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         html {
             scroll-behavior: smooth;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: background 0.3s ease, color 0.3s ease;
             padding: 20px;
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-        }
-        
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-        
-        .stats {
+
+        /* Glassmorphism Controls Bar */
+        .controls-bar {
+            position: sticky;
+            top: 20px;
+            z-index: 1000;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
             display: flex;
-            justify-content: space-around;
-            padding: 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            animation: slideDown 0.5s ease;
         }
-        
-        .stat {
-            text-align: center;
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
-        .stat a {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            padding: 10px;
-            border-radius: 8px;
+
+        .theme-switcher {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .theme-btn {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .theme-btn.active {
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+
+        .theme-btn.light { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .theme-btn.dark { background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%); }
+        .theme-btn.cyberpunk { background: linear-gradient(135deg, #ff006e 0%, #8338ec 100%); }
+        .theme-btn.ocean { background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%); }
+        .theme-btn.forest { background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%); }
+
+        /* Search Bar */
+        .search-container {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 48px 12px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 24px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 16px;
             transition: all 0.3s ease;
         }
-        
-        .stat a:hover {
-            background: rgba(102, 126, 234, 0.1);
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--text-muted);
+        }
+
+        /* Filter Buttons */
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-color);
             transform: translateY(-2px);
         }
-        
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
+
+        .filter-btn.active {
+            background: var(--bg-accent);
+            color: white;
+            border-color: transparent;
         }
-        
+
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn.active {
+            background: var(--bg-accent);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Stats Dashboard with Glassmorphism */
+        .stats-dashboard {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .stats-header h1 {
+            font-size: 3em;
+            margin-bottom: 12px;
+            background: var(--bg-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(20deg); }
+        }
+
+        .stats-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-color);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            background: var(--bg-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
         .stat-label {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
-        
+
+        .stat-icon {
+            font-size: 2em;
+            margin-bottom: 12px;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--bg-secondary);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            height: 300px;
+        }
+
         .content {
-            padding: 40px;
+            animation: fadeIn 0.8s ease;
         }
-        
+
         .section {
-            margin-bottom: 50px;
+            margin-bottom: 64px;
         }
-        
+
         .section-header {
             display: flex;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 0;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 3px solid var(--accent-color);
         }
-        
+
         .section-icon {
-            font-size: 1.5em;
-            margin-right: 12px;
-        }
-        
-        .section-title {
             font-size: 2em;
+            margin-right: 16px;
+        }
+
+        .section-title {
+            font-size: 2.2em;
             font-weight: 700;
-            color: #1d1d1f;
+            color: var(--text-primary);
             letter-spacing: -0.5px;
         }
-        
+
         .section-count {
             margin-left: auto;
-            background: #667eea;
+            background: var(--bg-accent);
             color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
+            padding: 8px 20px;
+            border-radius: 24px;
+            font-size: 1em;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
-        
-        .items {
+
+        /* Grid and List Views */
+        .items.grid-view {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             gap: 24px;
         }
-        
-        .item {
-            background: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.3s ease;
-            position: relative;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            height: 100%;
+
+        .items.list-view {
             display: flex;
             flex-direction: column;
+            gap: 16px;
         }
-        
+
+        .items.list-view .item {
+            display: flex;
+            flex-direction: row;
+            align-items: start;
+        }
+
+        .item {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--bg-accent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .item:hover::before {
+            transform: scaleX(1);
+        }
+
         .item:hover {
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
-            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--accent-color);
         }
-        
+
+        .item.bookmarked {
+            border-color: var(--warning-color);
+            box-shadow: 0 4px 16px rgba(255, 152, 0, 0.2);
+        }
+
+        .bookmark-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .bookmark-btn:hover {
+            transform: scale(1.2) rotate(12deg);
+            background: var(--warning-color);
+        }
+
+        .bookmark-btn.active {
+            background: var(--warning-color);
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
         .item-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
-            margin-bottom: 10px;
-        }
-        
-        .item-title {
-            font-size: 1.15em;
-            font-weight: 600;
-            color: #1d1d1f;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-        
-        .item-title a {
-            color: #1d1d1f;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-        
-        .item-title a:hover {
-            color: #667eea;
-        }
-        
-        .item-score {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9em;
-            white-space: nowrap;
-        }
-        
-        .item-description {
-            color: #6e6e73;
             margin-bottom: 16px;
-            line-height: 1.6;
-            font-size: 0.95em;
+        }
+
+        .item-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            line-height: 1.4;
             flex: 1;
         }
-        
-        .item-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            font-size: 0.85em;
-            color: #86868b;
-            margin-top: auto;
-            padding-top: 16px;
-        }
-        
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .meta-icon {
-            color: #667eea;
-        }
-        
-        .language-tag {
-            background: #f5f5f7;
-            color: #1d1d1f;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 0.8em;
-            font-weight: 500;
-        }
-        
-        .topic-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-        
-        .topic-tag {
-            background: #f5f5f7;
-            color: #1d1d1f;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 0.75em;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
-        
-        .context-badge {
-            display: inline-block;
-            background: #f5f5f7;
-            color: #1d1d1f;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 0.75em;
-            font-weight: 500;
-            margin-bottom: 0;
-        }
-        
-        .arxiv-badge {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.75em;
-            font-weight: 600;
-        }
-        
-        footer {
-            background: #f8f9fa;
-            padding: 30px;
-            text-align: center;
-            color: #666;
-            border-top: 1px solid #e0e0e0;
-        }
-        
-        footer a {
-            color: #667eea;
+
+        .item-title a {
+            color: var(--text-primary);
             text-decoration: none;
+            transition: all 0.2s ease;
+            position: relative;
         }
-        
-        footer a:hover {
-            text-decoration: underline;
+
+        .item-title a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
         }
-        
-        .creator-info {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #667eea;
+
+        .item-title a:hover {
+            color: var(--accent-color);
         }
-        
-        .creator-info h3 {
-            color: #667eea;
-            font-size: 1.1em;
-            margin-bottom: 10px;
+
+        .item-title a:hover::after {
+            width: 100%;
         }
-        
-        .creator-info p {
-            font-size: 0.95em;
-            line-height: 1.8;
-        }
-        
-        .creator-link {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white !important;
-            padding: 8px 20px;
-            border-radius: 20px;
-            margin-top: 10px;
-            font-weight: 600;
-            transition: transform 0.3s ease;
-        }
-        
-        .creator-link:hover {
-            transform: scale(1.05);
-            text-decoration: none !important;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        
+
         .ai-summary {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-left: 4px solid #667eea;
-            padding: 12px 16px;
-            margin: 12px 0;
-            border-radius: 8px;
-            font-size: 0.95em;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--accent-color);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            font-size: 1em;
             font-weight: 500;
-            color: #1d1d1f;
-            line-height: 1.5;
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
         }
-        
+
+        .ai-summary:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+        }
+
         .ai-summary::before {
             content: "✨ ";
-            font-size: 1.1em;
+            font-size: 1.2em;
         }
-        
+
         .trending-explanation {
-            background: #fff3e0;
-            border-left: 4px solid #ff9800;
-            padding: 12px 16px;
-            margin: 12px 0;
-            border-radius: 8px;
-            font-size: 0.9em;
-            color: #5d4037;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--warning-color);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            font-size: 0.95em;
+            color: var(--text-primary);
             line-height: 1.6;
+            transition: all 0.3s ease;
         }
-        
+
+        .trending-explanation:hover {
+            transform: translateX(8px);
+            box-shadow: 0 4px 16px rgba(255, 152, 0, 0.2);
+        }
+
         .trending-explanation::before {
             content: "🔥 Why it's trending: ";
             font-weight: 600;
-            color: #e65100;
+            color: var(--warning-color);
         }
-        
-        .copy-button {
-            background: #667eea;
+
+        .item-description {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.7;
+            font-size: 1em;
+            flex: 1;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+
+        .copy-button, .share-button, .expand-button {
+            background: var(--bg-accent);
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.85em;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.9em;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            margin-top: 8px;
+            gap: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
-        
-        .copy-button:hover {
-            background: #764ba2;
-            transform: scale(1.05);
+
+        .copy-button:hover, .share-button:hover, .expand-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
         }
-        
-        .copy-button:active {
-            transform: scale(0.98);
+
+        .copy-button:active, .share-button:active, .expand-button:active {
+            transform: scale(0.95);
         }
-        
+
         .copy-button.copied {
-            background: #34c759;
+            background: var(--success-color);
+            animation: pulse 0.5s ease;
         }
-        
-        .copy-button::before {
-            content: "📋";
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
-        
-        .copy-button.copied::before {
-            content: "✓";
+
+        .stats-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1em;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
         }
-        
+
+        .topic-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .topic-tag {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .topic-tag:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .language-tag {
+            background: var(--accent-color);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 0.9em;
+            color: var(--text-muted);
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 2px solid var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.hide {
+            animation: slideOutRight 0.3s ease forwards;
+        }
+
+        @keyframes slideOutRight {
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        footer {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 48px;
+            text-align: center;
+            color: var(--text-secondary);
+            border-radius: 20px;
+            margin-top: 64px;
+            border: 1px solid var(--glass-border);
+        }
+
+        footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--accent-secondary);
+            text-decoration: underline;
+        }
+
+        .creator-info {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 2px solid var(--accent-color);
+        }
+
+        .creator-info h3 {
+            color: var(--accent-color);
+            font-size: 1.5em;
+            margin-bottom: 16px;
+        }
+
+        .creator-link {
+            display: inline-block;
+            background: var(--bg-accent);
+            color: white !important;
+            padding: 12px 32px;
+            border-radius: 24px;
+            margin-top: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .creator-link:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            text-decoration: none !important;
+        }
+
+        .social-links {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--glass-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8em;
+            .stats-header h1 {
+                font-size: 2em;
             }
-            
-            .stats {
-                flex-direction: column;
-                gap: 20px;
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
             }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .items {
+
+            .items.grid-view {
                 grid-template-columns: 1fr;
+            }
+
+            .controls-bar {
+                padding: 12px;
+            }
+
+            .search-container {
+                min-width: 100%;
+            }
+
+            .filter-group {
+                width: 100%;
             }
         }
     </style>
 </head>
-<body>
+<body data-theme="light">
     <div class="container">
-        <header>
-            <div style="font-size: 0.9em; margin-bottom: 10px; opacity: 0.95;">
-                <strong>Yuval Avidani</strong> • AI Builder & Speaker • <a href="https://yuv.ai" target="_blank" style="color: white; text-decoration: underline;">YUV.AI</a>
+        <!-- Glassmorphism Controls Bar -->
+        <div class="controls-bar">
+            <!-- Theme Switcher -->
+            <div class="theme-switcher">
+                <button class="theme-btn light active" onclick="setTheme('light')" title="Light Theme"></button>
+                <button class="theme-btn dark" onclick="setTheme('dark')" title="Dark Theme"></button>
+                <button class="theme-btn cyberpunk" onclick="setTheme('cyberpunk')" title="Cyberpunk Theme"></button>
+                <button class="theme-btn ocean" onclick="setTheme('ocean')" title="Ocean Theme"></button>
+                <button class="theme-btn forest" onclick="setTheme('forest')" title="Forest Theme"></button>
             </div>
-            <h1>🤖 YUV.AI Developers AI Trends</h1>
-            <p>{{ date }} • {{ time_range }} Update</p>
-        </header>
-        
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number">{{ stats.total_items }}</div>
-                <div class="stat-label">Total Items</div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search trends, topics, papers..." id="searchInput" oninput="filterItems()">
+                <span class="search-icon">🔍</span>
             </div>
-            <div class="stat">
-                <a href="#github-trending">
-                    <div class="stat-number">{{ stats.github_repos }}</div>
-                    <div class="stat-label">GitHub Repos</div>
-                </a>
+
+            <!-- Filter Buttons -->
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all" onclick="filterBySource(this, 'all')">All</button>
+                <button class="filter-btn" data-filter="github" onclick="filterBySource(this, 'github')">🔥 GitHub</button>
+                <button class="filter-btn" data-filter="papers" onclick="filterBySource(this, 'papers')">📄 Papers</button>
+                <button class="filter-btn" data-filter="spaces" onclick="filterBySource(this, 'spaces')">🚀 Spaces</button>
             </div>
-            <div class="stat">
-                <a href="#hf-papers">
-                    <div class="stat-number">{{ stats.papers }}</div>
-                    <div class="stat-label">Papers</div>
-                </a>
-            </div>
-            <div class="stat">
-                <a href="#hf-spaces">
-                    <div class="stat-number">{{ stats.spaces }}</div>
-                    <div class="stat-label">HF Spaces</div>
-                </a>
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="setView('grid')">🎯 Grid</button>
+                <button class="view-btn" onclick="setView('list')">📋 List</button>
             </div>
         </div>
-        
+
+        <!-- Stats Dashboard with Charts -->
+        <div class="stats-dashboard">
+            <div class="stats-header">
+                <h1>🤖 YUV.AI Developers AI Trends</h1>
+                <div class="stats-subtitle">
+                    <strong>Yuval Avidani</strong> • AI Builder & Speaker •
+                    <a href="https://yuv.ai" target="_blank" style="color: var(--accent-color);">YUV.AI</a>
+                </div>
+                <div style="margin-top: 12px; color: var(--text-muted);">
+                    {{ date }} • {{ time_range }} Update
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card" onclick="scrollToSection('all')">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-number">{{ stats.total_items }}</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-card" onclick="scrollToSection('github-trending')">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number">{{ stats.github_repos }}</div>
+                    <div class="stat-label">GitHub Repos</div>
+                </div>
+                <div class="stat-card" onclick="scrollToSection('hf-papers')">
+                    <div class="stat-icon">📄</div>
+                    <div class="stat-number">{{ stats.papers }}</div>
+                    <div class="stat-label">Papers</div>
+                </div>
+                <div class="stat-card" onclick="scrollToSection('hf-spaces')">
+                    <div class="stat-icon">🚀</div>
+                    <div class="stat-number">{{ stats.spaces }}</div>
+                    <div class="stat-label">HF Spaces</div>
+                </div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
         <div class="content">
             {% if grouped_items.github_trending %}
-            <section class="section" id="github-trending">
+            <section class="section" id="github-trending" data-source="github">
                 <div class="section-header">
                     <span class="section-icon">🔥</span>
                     <h2 class="section-title">GitHub Trending</h2>
                     <span class="section-count">{{ grouped_items.github_trending|length }}</span>
                 </div>
-                <div class="items">
+                <div class="items grid-view">
                     {% for item in grouped_items.github_trending %}
-                    <div class="item">
-                        <div class="item-header" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                    <div class="item" data-source="github" data-name="{{ item.name|lower }}" data-topics="{{ (item.topics or [])|join(' ')|lower }}">
+                        <button class="bookmark-btn" onclick="toggleBookmark(this)" title="Bookmark">⭐</button>
+
+                        <div class="item-header">
                             <div style="flex: 1;">
                                 <div class="item-title">
                                     <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
@@ -458,47 +969,56 @@
                             </div>
                             <div style="text-align: right; margin-left: 16px;">
                                 {% if item.stars %}
-                                <div style="font-size: 1.2em; font-weight: bold; color: #667eea;">
+                                <div class="stats-badge">
                                     ⭐ {{ "{:,}".format(item.stars) }}
                                 </div>
                                 {% endif %}
                                 {% if item.stars_today %}
-                                <div style="font-size: 0.85em; color: #34c759;">
-                                    +{{ "{:,}".format(item.stars_today) }} ⭐ today
+                                <div style="font-size: 0.9em; color: var(--success-color); margin-top: 8px; font-weight: 600;">
+                                    +{{ "{:,}".format(item.stars_today) }} today
                                 </div>
                                 {% endif %}
                             </div>
                         </div>
+
                         {% if item.ai_summary %}
                         <div class="ai-summary">{{ item.ai_summary }}</div>
                         {% endif %}
+
                         {% if item.ai_trending_reason %}
                         <div class="trending-explanation">{{ item.ai_trending_reason }}</div>
                         {% endif %}
+
                         {% if item.description %}
                         <div class="item-description">{{ item.description }}</div>
                         {% endif %}
-                        <button class="copy-button" onclick="copyToClipboard(this, '{{ item.name }}', '{{ item.ai_summary|replace("'", "\\'") }}', '{{ item.url }}')">Copy Summary</button>
+
+                        <div class="action-buttons">
+                            <button class="copy-button" onclick="copyToClipboard(this, '{{ item.name }}', '{{ item.ai_summary|replace("'", "\\'") }}', '{{ item.url }}')">
+                                📋 Copy
+                            </button>
+                            <button class="share-button" onclick="shareItem('{{ item.name }}', '{{ item.url }}')">
+                                🔗 Share
+                            </button>
+                        </div>
+
                         {% if item.topics %}
                         <div class="topic-tags">
                             {% for topic in item.topics[:5] %}
-                            <span class="topic-tag">{{ topic }}</span>
+                            <span class="topic-tag" onclick="searchTopic('{{ topic }}')">{{ topic }}</span>
                             {% endfor %}
                         </div>
                         {% endif %}
+
                         <div class="item-meta">
                             {% if item.language %}
                             <span class="language-tag">{{ item.language }}</span>
                             {% endif %}
                             {% if item.forks %}
-                            <span class="meta-item">
-                                {{ "{:,}".format(item.forks) }} forks
-                            </span>
+                            <span>🍴 {{ "{:,}".format(item.forks) }} forks</span>
                             {% endif %}
                             {% if item.built_by %}
-                            <span class="meta-item">
-                                {{ item.built_by }} contributors
-                            </span>
+                            <span>👥 {{ item.built_by }} contributors</span>
                             {% endif %}
                         </div>
                     </div>
@@ -506,105 +1026,89 @@
                 </div>
             </section>
             {% endif %}
-            
-            {% if grouped_items.github_explore %}
-            <section class="section">
-                <div class="section-header">
-                    <span class="section-icon">📦</span>
-                    <h2 class="section-title">GitHub Collections</h2>
-                    <span class="section-count">{{ grouped_items.github_explore|length }}</span>
-                </div>
-                <div class="items">
-                    {% for item in grouped_items.github_explore %}
-                    <div class="item">
-                        <div class="item-header" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
-                            <div style="flex: 1;">
-                                <div class="item-title">
-                                    <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <span class="context-badge">📦 Curated</span>
-                            </div>
-                        </div>
-                        {% if item.ai_summary %}
-                        <div class="ai-summary">{{ item.ai_summary }}</div>
-                        {% endif %}
-                        {% if item.ai_trending_reason %}
-                        <div class="trending-explanation">{{ item.ai_trending_reason }}</div>
-                        {% endif %}
-                        {% if item.description %}
-                        <div class="item-description">{{ item.description }}</div>
-                        {% endif %}
-                        <button class="copy-button" onclick="copyToClipboard(this, '{{ item.name }}', '{{ item.ai_summary|replace("'", "\\'") }}', '{{ item.url }}')">Copy Summary</button>
-                    </div>
-                    {% endfor %}
-                </div>
-            </section>
-            {% endif %}
-            
+
             {% if grouped_items.huggingface_papers %}
-            <section class="section" id="hf-papers">
+            <section class="section" id="hf-papers" data-source="papers">
                 <div class="section-header">
                     <span class="section-icon">📄</span>
                     <h2 class="section-title">Hugging Face Papers</h2>
                     <span class="section-count">{{ grouped_items.huggingface_papers|length }}</span>
                 </div>
-                <div class="items">
+                <div class="items grid-view">
                     {% for item in grouped_items.huggingface_papers %}
-                    <div class="item">
+                    <div class="item" data-source="papers" data-name="{{ item.name|lower }}">
+                        <button class="bookmark-btn" onclick="toggleBookmark(this)" title="Bookmark">⭐</button>
+
                         <div class="item-header">
                             <div style="flex: 1;">
                                 <div class="item-title">
                                     <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
                                 </div>
+                                {% if item.arxiv_id %}
+                                <div style="margin-top: 8px;">
+                                    <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600;">
+                                        arXiv:{{ item.arxiv_id }}
+                                    </span>
+                                </div>
+                                {% endif %}
                             </div>
                             <div style="text-align: right;">
                                 {% if item.upvotes %}
-                                <div style="font-size: 1.2em; font-weight: bold; color: #667eea;">
+                                <div class="stats-badge">
                                     👍 {{ item.upvotes }}
                                 </div>
                                 {% endif %}
                                 {% if item.published_date %}
-                                <div style="font-size: 0.85em; color: #666;">
+                                <div style="font-size: 0.85em; color: var(--text-muted); margin-top: 8px;">
                                     {{ item.published_date }}
                                 </div>
                                 {% endif %}
                             </div>
                         </div>
-                        {% if item.arxiv_id %}
-                        <span class="arxiv-badge">arXiv:{{ item.arxiv_id }}</span>
-                        {% endif %}
+
                         {% if item.ai_summary %}
                         <div class="ai-summary">{{ item.ai_summary }}</div>
                         {% endif %}
+
                         {% if item.ai_trending_reason %}
                         <div class="trending-explanation">{{ item.ai_trending_reason }}</div>
                         {% endif %}
+
                         {% if item.description %}
                         <div class="item-description">{{ item.description }}</div>
                         {% endif %}
-                        <button class="copy-button" onclick="copyToClipboard(this, '{{ item.name }}', '{{ item.ai_summary|replace("'", "\\'") }}', '{{ item.url }}')">Copy Summary</button>
+
+                        <div class="action-buttons">
+                            <button class="copy-button" onclick="copyToClipboard(this, '{{ item.name }}', '{{ item.ai_summary|replace("'", "\\'") }}', '{{ item.url }}')">
+                                📋 Copy
+                            </button>
+                            <button class="share-button" onclick="shareItem('{{ item.name }}', '{{ item.url }}')">
+                                🔗 Share
+                            </button>
+                        </div>
+
                         <div class="item-meta">
-                            <span class="context-badge">📄 Research Paper</span>
+                            <span>📄 Research Paper</span>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             </section>
             {% endif %}
-            
+
             {% if grouped_items.huggingface_spaces %}
-            <section class="section" id="hf-spaces">
+            <section class="section" id="hf-spaces" data-source="spaces">
                 <div class="section-header">
                     <span class="section-icon">🚀</span>
                     <h2 class="section-title">Hugging Face Spaces</h2>
                     <span class="section-count">{{ grouped_items.huggingface_spaces|length }}</span>
                 </div>
-                <div class="items">
+                <div class="items grid-view">
                     {% for item in grouped_items.huggingface_spaces %}
-                    <div class="item">
-                        <div class="item-header" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                    <div class="item" data-source="spaces" data-name="{{ item.name|lower }}">
+                        <button class="bookmark-btn" onclick="toggleBookmark(this)" title="Bookmark">⭐</button>
+
+                        <div class="item-header">
                             <div style="flex: 1;">
                                 <div class="item-title">
                                     <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
@@ -612,29 +1116,41 @@
                             </div>
                             <div style="text-align: right; margin-left: 16px;">
                                 {% if item.likes %}
-                                <div style="font-size: 1.2em; font-weight: bold; color: #667eea;">
+                                <div class="stats-badge">
                                     ❤️ {{ "{:,}".format(item.likes) }}
                                 </div>
                                 {% endif %}
                                 {% if item.created_at %}
-                                <div style="font-size: 0.85em; color: #666;">
+                                <div style="font-size: 0.85em; color: var(--text-muted); margin-top: 8px;">
                                     {{ item.created_at }}
                                 </div>
                                 {% endif %}
                             </div>
                         </div>
+
                         {% if item.ai_summary %}
                         <div class="ai-summary">{{ item.ai_summary }}</div>
                         {% endif %}
+
                         {% if item.ai_trending_reason %}
                         <div class="trending-explanation">{{ item.ai_trending_reason }}</div>
                         {% endif %}
+
                         {% if item.description %}
                         <div class="item-description">{{ item.description }}</div>
                         {% endif %}
-                        <button class="copy-button" onclick="copyToClipboard(this, '{{ item.name }}', '{{ item.ai_summary|replace("'", "\\'") }}', '{{ item.url }}')">Copy Summary</button>
+
+                        <div class="action-buttons">
+                            <button class="copy-button" onclick="copyToClipboard(this, '{{ item.name }}', '{{ item.ai_summary|replace("'", "\\'") }}', '{{ item.url }}')">
+                                📋 Copy
+                            </button>
+                            <button class="share-button" onclick="shareItem('{{ item.name }}', '{{ item.url }}')">
+                                🔗 Share
+                            </button>
+                        </div>
+
                         <div class="item-meta">
-                            <span class="context-badge">🚀 Interactive Demo</span>
+                            <span>🚀 Interactive Demo</span>
                             {% if item.sdk %}
                             <span class="language-tag">{{ item.sdk }}</span>
                             {% endif %}
@@ -644,61 +1160,333 @@
                 </div>
             </section>
             {% endif %}
-            
-            {% if stats.total_items == 0 %}
-            <div class="empty-state">
-                <h2>No items found for this time range</h2>
-                <p>Try a different date range or check back later.</p>
-            </div>
-            {% endif %}
         </div>
-        
+
         <footer>
-            <p>Generated by <strong>Gen AI News Aggregator</strong></p>
+            <p style="font-size: 1.1em; margin-bottom: 8px;">Generated by <strong>YUV.AI Trends Aggregator</strong></p>
             <p>Data from <a href="https://github.com/trending">GitHub</a> • <a href="https://huggingface.co">Hugging Face</a></p>
-            <p style="margin-top: 10px; font-size: 0.9em;">{{ generated_at }}</p>
-            
+            <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-muted);">{{ generated_at }}</p>
+
             <div class="creator-info">
                 <h3>✨ Built by</h3>
-                <p>
+                <p style="font-size: 1.1em; line-height: 1.8;">
                     <strong>Yuval Avidani</strong><br>
                     AI Builder & Speaker
                 </p>
-                <a href="https://yuv.ai" target="_blank" class="creator-link">🌐 YUV.AI</a>
-                <div style="margin-top: 15px; font-size: 0.9em; line-height: 1.8;">
-                    <a href="https://linktr.ee/yuvai" target="_blank" style="color: #667eea; text-decoration: none; margin: 0 8px;">🔗 Linktree</a> •
-                    <a href="https://instagram.com/yuval_770" target="_blank" style="color: #667eea; text-decoration: none; margin: 0 8px;">📷 Instagram</a> •
-                    <a href="https://x.com/yuvalav" target="_blank" style="color: #667eea; text-decoration: none; margin: 0 8px;">𝕏 Twitter</a> •
-                    <a href="https://github.com/hoodini" target="_blank" style="color: #667eea; text-decoration: none; margin: 0 8px;">💻 GitHub</a> •
-                    <a href="https://youtube.com/@yuv-ai" target="_blank" style="color: #667eea; text-decoration: none; margin: 0 8px;">📺 YouTube</a> •
-                    <a href="https://tiktok.com/@yuval.ai" target="_blank" style="color: #667eea; text-decoration: none; margin: 0 8px;">🎵 TikTok</a>
+                <a href="https://yuv.ai" target="_blank" class="creator-link">🌐 Visit YUV.AI</a>
+
+                <div class="social-links">
+                    <a href="https://linktr.ee/yuvai" target="_blank">🔗 Linktree</a>
+                    <a href="https://instagram.com/yuval_770" target="_blank">📷 Instagram</a>
+                    <a href="https://x.com/yuvalav" target="_blank">𝕏 Twitter</a>
+                    <a href="https://github.com/hoodini" target="_blank">💻 GitHub</a>
+                    <a href="https://youtube.com/@yuv-ai" target="_blank">📺 YouTube</a>
+                    <a href="https://tiktok.com/@yuval.ai" target="_blank">🎵 TikTok</a>
                 </div>
             </div>
         </footer>
     </div>
-    
+
     <script>
+        // Theme Switching
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+
+            // Update active theme button
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.theme-btn.${theme}`).classList.add('active');
+
+            showToast(`🎨 ${theme.charAt(0).toUpperCase() + theme.slice(1)} theme activated!`);
+
+            // Recreate chart with new theme
+            createTrendChart();
+        }
+
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            loadBookmarks();
+            createTrendChart();
+        });
+
+        // Search and Filter
+        function filterItems() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.item');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const name = item.getAttribute('data-name') || '';
+                const topics = item.getAttribute('data-topics') || '';
+                const text = item.textContent.toLowerCase();
+
+                if (name.includes(searchTerm) || topics.includes(searchTerm) || text.includes(searchTerm)) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            if (searchTerm && visibleCount === 0) {
+                showToast('❌ No results found');
+            }
+        }
+
+        function filterBySource(button, source) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // Filter items
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                if (source === 'all') {
+                    section.style.display = '';
+                } else {
+                    const sectionSource = section.getAttribute('data-source');
+                    section.style.display = sectionSource === source ? '' : 'none';
+                }
+            });
+
+            showToast(`🔍 Showing ${source === 'all' ? 'all items' : source}`);
+        }
+
+        function searchTopic(topic) {
+            document.getElementById('searchInput').value = topic;
+            filterItems();
+            showToast(`🔍 Searching for: ${topic}`);
+        }
+
+        // View Toggle
+        function setView(view) {
+            const itemsContainers = document.querySelectorAll('.items');
+            itemsContainers.forEach(container => {
+                container.className = view === 'grid' ? 'items grid-view' : 'items list-view';
+            });
+
+            // Update active button
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            showToast(`👁️ ${view.charAt(0).toUpperCase() + view.slice(1)} view activated`);
+        }
+
+        // Bookmark System
+        function toggleBookmark(button) {
+            const item = button.closest('.item');
+            const itemName = item.querySelector('.item-title a').textContent;
+
+            let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+
+            if (button.classList.contains('active')) {
+                button.classList.remove('active');
+                item.classList.remove('bookmarked');
+                bookmarks = bookmarks.filter(b => b !== itemName);
+                showToast('🗑️ Bookmark removed');
+            } else {
+                button.classList.add('active');
+                item.classList.add('bookmarked');
+                bookmarks.push(itemName);
+                showToast('⭐ Bookmarked!');
+            }
+
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        }
+
+        function loadBookmarks() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            document.querySelectorAll('.item').forEach(item => {
+                const itemName = item.querySelector('.item-title a').textContent;
+                if (bookmarks.includes(itemName)) {
+                    item.querySelector('.bookmark-btn').classList.add('active');
+                    item.classList.add('bookmarked');
+                }
+            });
+        }
+
+        // Copy to Clipboard
         function copyToClipboard(button, name, summary, url) {
             const text = `${name}\n${summary}\n${url}`;
-            
+
             navigator.clipboard.writeText(text).then(() => {
-                // Change button text and style
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
                 button.classList.add('copied');
-                
-                // Reset after 2 seconds
+                button.innerHTML = '✓ Copied!';
+                showToast('📋 Copied to clipboard!');
+
                 setTimeout(() => {
-                    button.textContent = originalText;
                     button.classList.remove('copied');
+                    button.innerHTML = '📋 Copy';
                 }, 2000);
             }).catch(err => {
                 console.error('Failed to copy:', err);
-                button.textContent = 'Failed to copy';
-                setTimeout(() => {
-                    button.textContent = 'Copy Summary';
-                }, 2000);
+                showToast('❌ Failed to copy');
             });
+        }
+
+        // Share Item
+        function shareItem(name, url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: name,
+                    url: url
+                }).then(() => {
+                    showToast('🔗 Shared successfully!');
+                }).catch(() => {
+                    fallbackShare(url);
+                });
+            } else {
+                fallbackShare(url);
+            }
+        }
+
+        function fallbackShare(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('🔗 Link copied to clipboard!');
+            });
+        }
+
+        // Toast Notifications
+        function showToast(message) {
+            // Remove existing toast
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span style="font-size: 1.2em;">${message.split(' ')[0]}</span> <span>${message.substring(message.indexOf(' ') + 1)}</span>`;
+            document.body.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Scroll to Section
+        function scrollToSection(id) {
+            if (id === 'all') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+
+        // Create Trend Chart
+        function createTrendChart() {
+            const ctx = document.getElementById('trendChart');
+            if (!ctx) return;
+
+            // Destroy existing chart if it exists
+            if (window.trendChartInstance) {
+                window.trendChartInstance.destroy();
+            }
+
+            const theme = document.body.getAttribute('data-theme');
+            const isDark = theme !== 'light';
+
+            window.trendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['GitHub Repos', 'Papers', 'Spaces', 'Total'],
+                    datasets: [{
+                        label: 'Trending Items',
+                        data: [{{ stats.github_repos }}, {{ stats.papers }}, {{ stats.spaces }}, {{ stats.total_items }}],
+                        borderColor: 'rgb(102, 126, 234)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: 'rgb(102, 126, 234)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: isDark ? '#fff' : '#1d1d1f',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '📊 Trending Distribution',
+                            color: isDark ? '#fff' : '#1d1d1f',
+                            font: {
+                                size: 18,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: isDark ? '#b0b0b0' : '#666'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: isDark ? '#b0b0b0' : '#666'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + K for search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                document.getElementById('searchInput').value = '';
+                filterItems();
+            }
+        });
+
+        // Show welcome toast on first visit
+        if (!localStorage.getItem('visited')) {
+            setTimeout(() => {
+                showToast('👋 Welcome to YUV.AI Trends! Explore the latest AI innovations');
+                localStorage.setItem('visited', 'true');
+            }, 1000);
         }
     </script>
 </body>
