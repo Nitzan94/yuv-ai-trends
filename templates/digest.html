@@ -138,84 +138,35 @@
 
         .theme-switcher {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
-            background: var(--bg-secondary);
-            padding: 8px 16px;
-            border-radius: 16px;
-            border: 2px solid var(--border-color);
-        }
-
-        .theme-switcher::before {
-            content: "🎨";
-            font-size: 20px;
-            margin-right: 4px;
-        }
-
-        .theme-btn-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
         }
 
         .theme-btn {
-            width: 44px;
-            height: 44px;
-            border: 3px solid var(--border-color);
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .theme-btn:hover {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
         .theme-btn.active {
-            border: 4px solid var(--accent-color);
-            box-shadow: 0 0 24px var(--accent-color), 0 4px 12px rgba(0,0,0,0.3);
-            transform: scale(1.1);
-        }
-
-        .theme-btn.active::after {
-            content: "✓";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .theme-label {
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-color);
         }
 
         .theme-btn.light { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .theme-btn.dark { background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%); }
-        .theme-btn.cyberpunk {
-            background: linear-gradient(135deg, #ff006e 0%, #8338ec 100%);
-            box-shadow: 0 0 20px rgba(255, 0, 110, 0.3);
-        }
-        .theme-btn.ocean {
-            background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
-            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
-        }
-        .theme-btn.forest {
-            background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%);
-            box-shadow: 0 0 20px rgba(82, 183, 136, 0.3);
-        }
+        .theme-btn.cyberpunk { background: linear-gradient(135deg, #ff006e 0%, #8338ec 100%); }
+        .theme-btn.ocean { background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%); }
+        .theme-btn.forest { background: linear-gradient(135deg, #52b788 0%, #2d6a4f 100%); }
 
         /* Search Bar */
         .search-container {
@@ -918,26 +869,6 @@
             .filter-group {
                 width: 100%;
             }
-
-            .theme-switcher {
-                width: 100%;
-                justify-content: space-between;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .theme-btn {
-                width: 40px;
-                height: 40px;
-            }
-
-            .theme-label {
-                font-size: 9px;
-            }
-
-            .chart-container {
-                height: 250px;
-            }
         }
     </style>
 </head>
@@ -947,26 +878,11 @@
         <div class="controls-bar">
             <!-- Theme Switcher -->
             <div class="theme-switcher">
-                <div class="theme-btn-wrapper">
-                    <button class="theme-btn light active" onclick="setTheme('light')" title="Light Theme"></button>
-                    <span class="theme-label">Light</span>
-                </div>
-                <div class="theme-btn-wrapper">
-                    <button class="theme-btn dark" onclick="setTheme('dark')" title="Dark Theme"></button>
-                    <span class="theme-label">Dark</span>
-                </div>
-                <div class="theme-btn-wrapper">
-                    <button class="theme-btn cyberpunk" onclick="setTheme('cyberpunk')" title="Cyberpunk Theme"></button>
-                    <span class="theme-label">Cyber</span>
-                </div>
-                <div class="theme-btn-wrapper">
-                    <button class="theme-btn ocean" onclick="setTheme('ocean')" title="Ocean Theme"></button>
-                    <span class="theme-label">Ocean</span>
-                </div>
-                <div class="theme-btn-wrapper">
-                    <button class="theme-btn forest" onclick="setTheme('forest')" title="Forest Theme"></button>
-                    <span class="theme-label">Forest</span>
-                </div>
+                <button class="theme-btn light active" onclick="setTheme('light')" title="Light Theme"></button>
+                <button class="theme-btn dark" onclick="setTheme('dark')" title="Dark Theme"></button>
+                <button class="theme-btn cyberpunk" onclick="setTheme('cyberpunk')" title="Cyberpunk Theme"></button>
+                <button class="theme-btn ocean" onclick="setTheme('ocean')" title="Ocean Theme"></button>
+                <button class="theme-btn forest" onclick="setTheme('forest')" title="Forest Theme"></button>
             </div>
 
             <!-- Search Bar -->
