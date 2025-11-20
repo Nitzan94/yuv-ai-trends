@@ -872,15 +872,15 @@
         }
     </style>
 </head>
-<body data-theme="light">
+<body data-theme="cyberpunk">
     <div class="container">
         <!-- Glassmorphism Controls Bar -->
         <div class="controls-bar">
             <!-- Theme Switcher -->
             <div class="theme-switcher">
-                <button class="theme-btn light active" onclick="setTheme('light')" title="Light Theme"></button>
+                <button class="theme-btn light" onclick="setTheme('light')" title="Light Theme"></button>
                 <button class="theme-btn dark" onclick="setTheme('dark')" title="Dark Theme"></button>
-                <button class="theme-btn cyberpunk" onclick="setTheme('cyberpunk')" title="Cyberpunk Theme"></button>
+                <button class="theme-btn cyberpunk active" onclick="setTheme('cyberpunk')" title="Cyberpunk Theme"></button>
                 <button class="theme-btn ocean" onclick="setTheme('ocean')" title="Ocean Theme"></button>
                 <button class="theme-btn forest" onclick="setTheme('forest')" title="Forest Theme"></button>
             </div>
@@ -1207,7 +1207,7 @@
 
         // Load saved theme
         window.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = localStorage.getItem('theme') || 'cyberpunk';
             setTheme(savedTheme);
             loadBookmarks();
             createTrendChart();
